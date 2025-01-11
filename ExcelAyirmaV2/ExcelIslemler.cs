@@ -1,8 +1,5 @@
 ﻿using OfficeOpenXml;
 using _Excel = Microsoft.Office.Interop.Excel;
-using System.IO;      // Dosya okuma/yazma işlemleri için
-using System;         // Genel .NET sınıfları için
-using System.Windows.Forms;
 using System.Diagnostics;
 using System.Data; // Hata mesajlarını göstermek için (isteğe bağlı)
 
@@ -16,14 +13,7 @@ namespace ExcelAyirmaV2
 
         System.Data.DataTable dataTableList = new System.Data.DataTable("Excel-List");
 
-
         int columncontrolnumber = 8;
-        int rowsCount = 0, columnsCount = 0;
-        ProgressBar progress;
-        Label label1;
-
-        // Gelen adresdeki excel dosyasını açar ve 1. sayfa seçilir.
-
 
         public ExcelIslemler()
         {
@@ -67,7 +57,6 @@ namespace ExcelAyirmaV2
 
         private ExcelPackage package;
         private ExcelWorksheet worksheet;
-
         public void excelOpen(string path)
         {
             try
@@ -150,6 +139,7 @@ namespace ExcelAyirmaV2
                 MessageBox.Show($"Sütunlar bölünürken bir hata oluştu.\nHata Kodu: {ex.Message}");
             }
         }
+
         public void dataTable()
         {
             try
@@ -185,7 +175,6 @@ namespace ExcelAyirmaV2
         }
 
         // Sayfa oluşturmak için aynı değerleri teke indirip diziye ekliyor
-
         private Dictionary<string, List<DataRow>> getGroupedData()
         {
             Dictionary<string, List<DataRow>> groupdata = new Dictionary<string, List<DataRow>>();
@@ -230,200 +219,92 @@ namespace ExcelAyirmaV2
             }
 
         }
+
+        public void InsertBlankRowInSpecificSheet(string sheetName, int columnToCheck)
+        {
+            try
+            {
+                if (package == null || package.Workbook == null || package.Workbook.Worksheets.Count == 0)
+                {
+                    MessageBox.Show("Çalışma kitabı boş veya geçerli bir veri bulunamadı.");
+                    return;
+                }
+
+                // Belirtilen sayfayı bul
+                var sheet = package.Workbook.Worksheets[sheetName];
+                if (sheet == null || sheet.Dimension == null)
+                {
+                    MessageBox.Show($"'{sheetName}' adlı sayfa bulunamadı veya boş.");
+                    return;
+                }
+
+                int lastRow = sheet.Dimension.End.Row;
+                string previousValue = null;
+
+                // Son satırdan başlayarak farklı değerler arasında boşluk ekle
+                for (int row = lastRow; row >= 2; row--)
+                {
+                    var cellValue = sheet.Cells[row, columnToCheck].Value?.ToString();
+
+                    if (previousValue != null && cellValue != previousValue)
+                    {
+                        sheet.InsertRow(row + 1, 1); // Farklı değerler arasında satır ekle
+                    }
+
+                    previousValue = cellValue;
+                }
+
+                MessageBox.Show($"'{sheetName}' sayfasında boş satır ekleme işlemi başarıyla tamamlandı.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Bir hata oluştu: {ex.Message}");
+            }
+        }
+
+        // Kaydedilecek yeni excelde sayfa sayfa gezerek sütuna göre farklı olan satırların arasına boşluk bırakıp yeni excele aktarır.
+        public void sheetRowSpace()
+        {
+            String sheetname = "";
+            for (int i = 1; i < package.Workbook.Worksheets.Count; i++)
+            {
+                worksheet = package.Workbook.Worksheets[i];
+
+                sheetname = worksheet.Name;
+                switch (sheetname)
+                {
+                    case "A HABER":
+                        InsertBlankRowInSpecificSheet("A HABER", 11);
+                        break;
+                    case "A SPOR":
+                        InsertBlankRowInSpecificSheet("A SPOR", 11);
+                        break;
+                    case "APARA":
+                        InsertBlankRowInSpecificSheet("APARA", 11);
+                        break;
+                    case "ATV":
+                        InsertBlankRowInSpecificSheet("ATV", 10);
+                        break;
+                    case "VAV":
+                        InsertBlankRowInSpecificSheet("VAV", 10);
+                        break;
+                    case "TEKNIK BILGI ISLEM":
+                        InsertBlankRowInSpecificSheet("TEKNIK BILGI ISLEM", 12);
+                        break;
+                    case "GENEL ARŞİV (AJANSLAR -İNGESTLE":
+                        InsertBlankRowInSpecificSheet("GENEL ARŞİV (AJANSLAR -İNGESTLE", 13);
+                        break;
+                    default:
+                        columncontrolnumber = 8;
+                        break;
+                }
+            }
+        }
+
         // Açık olan exceli kapatır.
         public void excelQuit()
         {
             package.Save();
-        }
-
-        /* public ExcelIslemler(ProgressBar progress, Label label)
-         {
-             this.progress = progress;
-             this.label1 = label;
-         }
-
-
-
-
-
-         // Progresbar ilk ayarı için oluşturuldu.
-         void progressBarSetting()
-         {
-             progress.Minimum = 0;
-             progress.Maximum = rowsCount - 1;
-             progress.Value = 0;
-         }
-
-
-         
-
-         // Adresdeki exceli dataTableList nesnesine aktarır.
-         
-
-
-         // dataTableList nesnesini farklı yerlerde kullanabilmek için oluşturuldu.
-         public DataTable getDataTable() { return dataTableList; }
-
-
-         
-
-         // dataTableList nesnesini yeni bir excele kaydeder.
-         void newExcel()
-         {
-             workbook = excel.Workbooks.Add(System.Reflection.Missing.Value);
-             foreach (String item in dict.Keys)
-             {
-                 // Yeni açılan excelde sayfalar oluşturur.
-                 worksheet = workbook.Worksheets.Add();
-                 worksheet.Name = sheetnamelenght(item.ToString());
-                 worksheet = workbook.Worksheets[1];
-
-                 Debug.Print("Sayfalar oluşturuluyor...");
-                 for (int j = 0; j < dataTableList.Columns.Count; j++)
-                 {
-                     worksheet.Cells[1, j + 1] = dataTableList.Columns[j].ColumnName.ToString();
-                 }
-
-                 // Açılan sayfanın ismine göre sayfanın içine satırları koyar
-                 int row = 1;
-                 for (int i = 0; i < dataTableList.Rows.Count; i++)
-                 {
-                     if (dataTableList.Rows[i][columncontrolnumber].ToString() == item.ToString())
-                     {
-                         for (int j = 0; j < dataTableList.Columns.Count; j++)
-                         {
-                             worksheet.Cells[row + 1, j + 1] = dataTableList.Rows[i][j];
-                         }
-                         row++;
-                     }
-                 }
-             }
-             worksheet = workbook.Worksheets[workbook.Worksheets.Count];
-             worksheet.Delete();
-         }
-
-
-         // Sayfa adı uzun ise ilk 15 karakteri alıyor.
-         String sheetnamelenght(String value)
-         {
-             String control;
-             if (value.Length < 32)
-             {
-                 control = value;
-             }
-             else
-             {
-                 control = value.Substring(0, 31).ToString();
-             }
-             return control;
-         }
-
-
-         // Kaydedilecek yeni excelde sayfa sayfa gezerek sütuna göre farklı olan satırların arasına boşluk bırakıp yeni excele aktarır.
-         public void sheetRowSpace()
-         {
-             String sheetname = "";
-             for (int i = 1; i <= workbook.Worksheets.Count; i++)
-             {
-                 worksheet = workbook.Worksheets[i];
-
-                 //dataTableList nesnesini temizler
-                 dataTableList.Clear();
-                 Debug.Print(i.ToString() + ". sayfa DataTable nesnesine aktarımı yapılıyor...");
-                 dataTable();
-
-                 sheetname = worksheet.Name;
-                 switch (sheetname)
-                 {
-                     case "A HABER":
-                         columncontrolnumber = 10;
-                         break;
-                     case "A SPOR":
-                         columncontrolnumber = 10;
-                         break;
-                     case "APARA":
-                         columncontrolnumber = 10;
-                         break;
-                     case "ATV":
-                         columncontrolnumber = 9;
-                         break;
-                     case "VAV":
-                         columncontrolnumber = 9;
-                         break;
-                     case "TEKNIK BILGI ISLEM":
-                         columncontrolnumber = 11;
-                         break;
-                     case "GENEL ARŞİV (AJANSLAR -İNGESTLE":
-                         columncontrolnumber = 12;
-                         break;
-                     default:
-                         columncontrolnumber = 8;
-                         break;
-                 }
-
-                 Debug.Print("Sıralama yapılıyor...");
-                 DataView dataView = dataTableList.DefaultView;
-                 dataView.Sort = dataTableList.Columns[columncontrolnumber].ColumnName + " ASC";
-                 dataTableList = dataView.ToTable();
-
-                 Debug.Print("Farklı olan satırlar ayrılıyor...");
-                 string prevValue = null;
-                 for (int j = 0; j < dataTableList.Rows.Count; j++)
-                 {
-                     string currentValue = dataTableList.Rows[j][columncontrolnumber].ToString();
-
-                     if (string.IsNullOrEmpty(currentValue))
-                     {
-                         continue;
-                     }
-
-                     if (prevValue == currentValue)
-                     {
-                         continue;
-                     }
-
-                     dataTableList.Rows.InsertAt(emptyRowSpace(), j);
-                     prevValue = currentValue;
-                 }
-
-                 for (int j = 0; j < dataTableList.Rows.Count; j++)
-                 {
-                     for (int k = 0; k < dataTableList.Columns.Count; k++)
-                     {
-                         worksheet.Cells[j + 2, k + 1] = dataTableList.Rows[j][k].ToString();
-                     }
-                 }
-             }
-         }
-
-
-         // Boş satır oluşturur.
-         DataRow emptyRowSpace()
-         {
-             DataRow dr = dataTableList.NewRow();
-             for (int j = 0; j < columnsCount; j++)
-             {
-                 dr[j] = "";
-             }
-             return dr;
-         }
-
-
-         // devam İşlem yapılacak exceldeki verileri dataTableList nesnesine aktarır. Yeni excel oluşturur ve yapılması gereken işlmelerden sonra yeni exceli kaydeder.
-         public void saveExcel(String adres, String filename)
-         {
-             dataTableList.Clear();
-             dataTable();
-             sheetnamelist();
-             excelquit(false);
-             newExcel();
-             sheetRowSpace();
-             workbook.SaveAs(@adres + @"\" + filename, _Excel.XlFileFormat.xlWorkbookNormal);
-             excelquit(true);
-         }
-
-
-         */
-
+        }        
     }
 }
