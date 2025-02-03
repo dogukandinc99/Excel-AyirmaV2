@@ -62,7 +62,6 @@ namespace ExcelAyirmaV2
                 excel.textToColumn(7);
                 excel.dataTable();
                 excel.splitAndSave();
-                excel.sheetRowSpace();
                 excel.excelQuit();
                 Debug.Print((i + 1) + " adlý dosya hazýrlandý................................................");
             }

@@ -7,11 +7,7 @@ namespace ExcelAyirmaV2
 {
     public class ExcelIslemler
     {
-        _Excel.Application excel = new _Excel.Application();
-        _Excel.Workbook _workbook;
-        _Excel.Worksheet _worksheet;
-
-        System.Data.DataTable dataTableList = new System.Data.DataTable("Excel-List");
+        System.Data.DataTable dataTableList;
 
         int columncontrolnumber = 8;
 
@@ -24,6 +20,10 @@ namespace ExcelAyirmaV2
         {
             try
             {
+                _Excel.Application excel = new _Excel.Application();
+                _Excel.Workbook _workbook;
+                _Excel.Worksheet _worksheet;
+
                 if (!File.Exists(xlsFilePath))
                 {
                     throw new FileNotFoundException("Dosya bulunamadı.", xlsFilePath);
@@ -45,7 +45,7 @@ namespace ExcelAyirmaV2
 
                 // Eski dosyayı sil ve geçici dosyayı yeniden adlandır
                 File.Delete(xlsFilePath);
-
+                Debug.Print("Dosya .xlsx türüne dönüştürüldü...");
                 // Yeni dosya yolunu döner
                 return newFilePath; // Yeni dosya adresi ve adı
             }
@@ -83,6 +83,7 @@ namespace ExcelAyirmaV2
                         worksheet.Cells[row, 6].Value = 1; // Sıfır olan değeri bire çevirir
                     }
                 }
+                Debug.Print("Sıfırlar bir ile değiştirildi...");
             }
             catch (Exception ex)
             {
@@ -132,7 +133,7 @@ namespace ExcelAyirmaV2
                     columnLetter++;
                 }
 
-                MessageBox.Show("Sütun bölme işlemi başarıyla tamamlandı.");
+                Debug.Print("Sütun bölme işlemi başarıyla tamamlandı.");
             }
             catch (Exception ex)
             {
@@ -144,8 +145,8 @@ namespace ExcelAyirmaV2
         {
             try
             {
+                dataTableList = new System.Data.DataTable("Excel-List");
                 int rows = worksheet.Dimension.Rows;
-                MessageBox.Show(rows.ToString());
                 int columns = worksheet.Dimension.Columns;
 
                 // Başlıkları ekle
@@ -170,7 +171,6 @@ namespace ExcelAyirmaV2
             {
                 MessageBox.Show("Kayıtlar aktarılırken beklenmedik bir hata oluştu. " +
                     "Lütfen teknik birim ile iletişime geçiniz.\n Hata kodu:" + e.Message.ToString());
-
             }
         }
 
@@ -198,17 +198,44 @@ namespace ExcelAyirmaV2
             {
                 var sheetName = string.IsNullOrEmpty(group.Key) ? "Sheet_" + Guid.NewGuid().ToString() : group.Key;
                 sheetName = sheetName.Length > 31 ? sheetName.Substring(0, 31) : sheetName;
+
+                // **Sayfa adına göre columncontrolnumber belirle**
+                switch (sheetName)
+                {
+                    case "A HABER":
+                    case "A SPOR":
+                    case "APARA":
+                        columncontrolnumber = 11;
+                        break;
+                    case "ATV":
+                    case "VAV":
+                        columncontrolnumber = 10;
+                        break;
+                    case "TEKNIK BILGI ISLEM":
+                        columncontrolnumber = 12;
+                        break;
+                    case "GENEL ARŞİV (AJANSLAR -İNGESTLE":
+                        columncontrolnumber = 13;
+                        break;
+                    default:
+                        columncontrolnumber = 8; // Varsayılan
+                        break;
+                }
+
+                // **Seçilen sütuna göre sıralama yap**
+                var sortedData = group.Value.OrderBy(row => row[(columncontrolnumber - 1)].ToString()).ToList();
+
                 var worksheet = package.Workbook.Worksheets.Add(sheetName);
 
-                // Başlıkları yaz
+                // **Başlıkları yaz**
                 for (int col = 0; col < dataTableList.Columns.Count; col++)
                 {
                     worksheet.Cells[1, col + 1].Value = dataTableList.Columns[col].ColumnName;
                 }
 
-                // Verileri yaz
+                // **Sıralanmış veriyi yaz**
                 int row = 2;
-                foreach (DataRow dataRow in group.Value)
+                foreach (DataRow dataRow in sortedData)
                 {
                     for (int col = 0; col < dataTableList.Columns.Count; col++)
                     {
@@ -216,7 +243,12 @@ namespace ExcelAyirmaV2
                     }
                     row++;
                 }
+
+                // **Boşluk ekleme işlemi**
+                InsertBlankRowInSpecificSheet(sheetName, columncontrolnumber);
             }
+
+            Debug.Print("Sayfa oluşturma, sıralama, boşluk ekleme ve verilerin aktarılması tamamlandı...");
 
         }
 
@@ -254,7 +286,7 @@ namespace ExcelAyirmaV2
                     previousValue = cellValue;
                 }
 
-                MessageBox.Show($"'{sheetName}' sayfasında boş satır ekleme işlemi başarıyla tamamlandı.");
+                Debug.Print($"'{sheetName}' sayfasında boş satır ekleme işlemi başarıyla tamamlandı.");
             }
             catch (Exception ex)
             {
@@ -262,49 +294,10 @@ namespace ExcelAyirmaV2
             }
         }
 
-        // Kaydedilecek yeni excelde sayfa sayfa gezerek sütuna göre farklı olan satırların arasına boşluk bırakıp yeni excele aktarır.
-        public void sheetRowSpace()
-        {
-            String sheetname = "";
-            for (int i = 1; i < package.Workbook.Worksheets.Count; i++)
-            {
-                worksheet = package.Workbook.Worksheets[i];
-
-                sheetname = worksheet.Name;
-                switch (sheetname)
-                {
-                    case "A HABER":
-                        InsertBlankRowInSpecificSheet("A HABER", 11);
-                        break;
-                    case "A SPOR":
-                        InsertBlankRowInSpecificSheet("A SPOR", 11);
-                        break;
-                    case "APARA":
-                        InsertBlankRowInSpecificSheet("APARA", 11);
-                        break;
-                    case "ATV":
-                        InsertBlankRowInSpecificSheet("ATV", 10);
-                        break;
-                    case "VAV":
-                        InsertBlankRowInSpecificSheet("VAV", 10);
-                        break;
-                    case "TEKNIK BILGI ISLEM":
-                        InsertBlankRowInSpecificSheet("TEKNIK BILGI ISLEM", 12);
-                        break;
-                    case "GENEL ARŞİV (AJANSLAR -İNGESTLE":
-                        InsertBlankRowInSpecificSheet("GENEL ARŞİV (AJANSLAR -İNGESTLE", 13);
-                        break;
-                    default:
-                        columncontrolnumber = 8;
-                        break;
-                }
-            }
-        }
-
         // Açık olan exceli kapatır.
         public void excelQuit()
         {
             package.Save();
-        }        
+        }
     }
 }
