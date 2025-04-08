@@ -177,6 +177,7 @@ namespace ExcelAyirmaV2
         // Sayfa oluşturmak için aynı değerleri teke indirip diziye ekliyor
         private Dictionary<string, List<DataRow>> getGroupedData()
         {
+            columncontrolnumber = 8;
             Dictionary<string, List<DataRow>> groupdata = new Dictionary<string, List<DataRow>>();
 
             foreach (DataRow row in dataTableList.Rows)

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ExcelAyirmaV2")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+393dafbad93b86a093dc1f24aae489b1cf60ece2")]
 [assembly: System.Reflection.AssemblyProductAttribute("ExcelAyirmaV2")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ExcelAyirmaV2")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
