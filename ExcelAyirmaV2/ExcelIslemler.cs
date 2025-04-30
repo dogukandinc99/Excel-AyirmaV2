@@ -16,13 +16,12 @@ namespace ExcelAyirmaV2
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
         }
 
-        public string ConvertXlsToXlsxInPlace(string xlsFilePath)
+        public string ConvertXlsToXlsxInPlace(string xlsFilePath, string saveDirectory, string newName)
         {
             try
             {
                 _Excel.Application excel = new _Excel.Application();
                 _Excel.Workbook _workbook;
-                _Excel.Worksheet _worksheet;
 
                 if (!File.Exists(xlsFilePath))
                 {
@@ -32,7 +31,7 @@ namespace ExcelAyirmaV2
                 _workbook = excel.Workbooks.Open(xlsFilePath);
 
                 // Yeni dosya yolu
-                string newFilePath = Path.ChangeExtension(xlsFilePath, ".xlsx");
+                string newFilePath = Path.Combine(saveDirectory, $"{newName}.xlsx");
 
                 // Kaydet ve kapat
                 _workbook.SaveAs(newFilePath, _Excel.XlFileFormat.xlOpenXMLWorkbook);
@@ -44,7 +43,7 @@ namespace ExcelAyirmaV2
                 System.Runtime.InteropServices.Marshal.ReleaseComObject(excel);
 
                 // Eski dosyayı sil ve geçici dosyayı yeniden adlandır
-                File.Delete(xlsFilePath);
+                //File.Delete(xlsFilePath);
                 Debug.Print("Dosya .xlsx türüne dönüştürüldü...");
                 // Yeni dosya yolunu döner
                 return newFilePath; // Yeni dosya adresi ve adı
@@ -177,7 +176,6 @@ namespace ExcelAyirmaV2
         // Sayfa oluşturmak için aynı değerleri teke indirip diziye ekliyor
         private Dictionary<string, List<DataRow>> getGroupedData()
         {
-            columncontrolnumber = 8;
             Dictionary<string, List<DataRow>> groupdata = new Dictionary<string, List<DataRow>>();
 
             foreach (DataRow row in dataTableList.Rows)
@@ -194,6 +192,7 @@ namespace ExcelAyirmaV2
 
         public void splitAndSave()
         {
+            columncontrolnumber = 8;
             // Her benzersiz değer için yeni sayfa oluştur
             foreach (var group in getGroupedData())
             {

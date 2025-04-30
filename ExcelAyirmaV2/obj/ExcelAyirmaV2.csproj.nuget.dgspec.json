@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\doguk\\Documents\\GitHub\\Excel-AyirmaV2\\ExcelAyirmaV2\\ExcelAyirmaV2.csproj": {}
+    "C:\\Users\\doguk\\source\\repos\\ExcelAyirmaV2\\ExcelAyirmaV2\\ExcelAyirmaV2.csproj": {}
   },
   "projects": {
-    "C:\\Users\\doguk\\Documents\\GitHub\\Excel-AyirmaV2\\ExcelAyirmaV2\\ExcelAyirmaV2.csproj": {
+    "C:\\Users\\doguk\\source\\repos\\ExcelAyirmaV2\\ExcelAyirmaV2\\ExcelAyirmaV2.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\doguk\\Documents\\GitHub\\Excel-AyirmaV2\\ExcelAyirmaV2\\ExcelAyirmaV2.csproj",
+        "projectUniqueName": "C:\\Users\\doguk\\source\\repos\\ExcelAyirmaV2\\ExcelAyirmaV2\\ExcelAyirmaV2.csproj",
         "projectName": "ExcelAyirmaV2",
-        "projectPath": "C:\\Users\\doguk\\Documents\\GitHub\\Excel-AyirmaV2\\ExcelAyirmaV2\\ExcelAyirmaV2.csproj",
+        "projectPath": "C:\\Users\\doguk\\source\\repos\\ExcelAyirmaV2\\ExcelAyirmaV2\\ExcelAyirmaV2.csproj",
         "packagesPath": "C:\\Users\\doguk\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\doguk\\Documents\\GitHub\\Excel-AyirmaV2\\ExcelAyirmaV2\\obj\\",
+        "outputPath": "C:\\Users\\doguk\\source\\repos\\ExcelAyirmaV2\\ExcelAyirmaV2\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

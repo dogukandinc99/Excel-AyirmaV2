@@ -57,7 +57,7 @@ namespace ExcelAyirmaV2
         {
             for (int i = 0; i < ofd.FileNames.Length; i++)
             {
-                excel.excelOpen(excel.ConvertXlsToXlsxInPlace(ofd.FileNames[i].ToString()));
+                excel.excelOpen(excel.ConvertXlsToXlsxInPlace(ofd.FileNames[i].ToString(), saveadressfoldertxt.Text, cellvaluetxt.Text + "_" + ofd.SafeFileNames[i].ToString()));
                 excel.zeroChangeOne();
                 excel.textToColumn(7);
                 excel.dataTable();
